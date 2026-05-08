@@ -1,6 +1,7 @@
 ---
 title: Building p4n4: The Beginning
 date: 2025-11-26
+excerpt: Every project starts somewhere... This one started with a question about local-first IoT and AI, and a first session spent turning raw hardware into something you can actually build on.
 ---
 
 Every project starts somewhere. For p4n4, it started with a question: what would it actually take to run a full IoT + AI stack entirely on local hardware, no cloud dependency, no monthly bill, no data leaving the network?
@@ -17,7 +18,7 @@ Before writing a single line of compose config, the first session was all hardwa
 
 The first task was getting a clean working environment on the laptop side, a place to write code, push config, and SSH into the Pi without friction.
 
-![Initial setup with laptop](media/2025-11-26/02_initial-setup.jpg)
+![Initial setup with laptop](media/02_initial-setup.jpg)
 
 Standard developer workstation prep: SSH keys provisioned and copied to the Pi, `~/.ssh/config` entry added so `ssh p4n4` just works, and a local clone of the repo ready to go. The Pi itself was flashed with Raspberry Pi OS Lite (64-bit) using Raspberry Pi Imager, with SSH enabled from the imager's advanced options so it came up headless on first boot.
 
@@ -25,11 +26,11 @@ Standard developer workstation prep: SSH keys provisioned and copied to the Pi, 
 
 Developing headless against a Pi is fine once things are stable, but in early bringup it helps to have eyes on what's happening. You know, the boot messages, kernel output, service logs scrolling by... Rather than connecting a monitor, OBS Studio was set up on the laptop to capture and display the Pi's HDMI output over a capture card. This is mostly on my side, as it's easier to carry my laptop instead of a stand-alone monitor just for the Raspberry Pi :)
 
-![Streaming RPi output via OBS](media/2025-11-26/01_streaming-rpi.jpg)
+![Streaming RPi output via OBS](media/01_streaming-rpi.jpg)
 
 OBS made it easy to confirm the Pi was booting cleanly, watch systemd service startup, and catch any early errors without needing a dedicated screen. As a quick sanity check that the capture was working before attaching the Pi, a test streaming was displayed.
 
-![Test image on OBS stream](media/2025-11-26/00_cute-cat.jpg)
+![Test image on OBS stream](media/00_cute-cat.jpg)
 
 Once the stream was confirmed live, the capture card was switched to the Pi's HDMI output. From here on, the laptop handled both development and monitoring in one window.
 
@@ -37,7 +38,7 @@ Once the stream was confirmed live, the capture card was switched to the Pi's HD
 
 One of the key hardware requirements for p4n4 is persistent, high-capacity local storage. We can save videos recording, and also the InfluxDB time-series data accumulates fast, and keeping it on the Pi's SD card is both slow and risky. The plan is to mount a USB hard drive as the data volume for the project. I choose a 1TB Seagate USB 3.0 Hard Drive.
 
-![USB hard drive connected to the Pi](media/2025-11-26/03_hdd-connected.jpg)
+![USB hard drive connected to the Pi](media/03_hdd-connected.jpg)
 
 The drive was connected, identified with `lsblk`, formatted to ext4, and mounted at `/mnt/p4n4-data`. A quick write/read test confirmed throughput was acceptable. The mount was added to `/etc/fstab` with `nofail` so a missing drive doesn't block boot.
 
@@ -45,7 +46,7 @@ The drive was connected, identified with `lsblk`, formatted to ext4, and mounted
 
 The camera is intended for the Edge AI side of the platform. Streaming frames to an inference pipeline running Edge Impulse. Getting it wired up and confirmed working early removes a lot of headaches later!
 
-![Raspberry Pi camera module connected](media/2025-11-26/04_camera-connected.jpg)
+![Raspberry Pi camera module connected](media/04_camera-connected.jpg)
 
 The camera was connected through the Pi 5's MIPI CSI port, enabled via `raspi-config`, and tested with `rpicam-still -o test.jpg`. The image came back clean. The camera is now a confirmed, available peripheral integration with the Edge AI stack comes later.
 

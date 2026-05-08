@@ -1,0 +1,12 @@
+{
+  "name": "p4n4-blog",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs && npx serve dist"
+  },
+  "dependencies": {
+    "marked": "^13.0.0"
+  }
+}

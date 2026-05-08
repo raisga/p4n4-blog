@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>p4n4</title>
+  <title>p4n4 :: build log</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="{{BASE}}css/style.css">
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <a href="index.html" class="wordmark">p4n4 :: build log</a>
+      <a href="{{BASE}}index.html" class="wordmark">p4n4 :: build log</a>
       <ul class="nav-links">
-        <li><a href="index.html">← index</a></li>
         <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
       </ul>
     </div>
@@ -22,18 +21,17 @@
 
   <main class="site-main">
     <div class="container">
-      <article id="post-article"></article>
+      {{POSTS_LIST}}
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <span class="footer-logo">p4n4<span>.com</span></span>
+      <a href="https://p4n4.com">
+        <span class="footer-logo">p4n4<span>.com</span></span>
+      </a>
       <span class="footer-copy">build log</span>
     </div>
   </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/marked@13/marked.min.js"></script>
-  <script src="js/post.js"></script>
 </body>
 </html>

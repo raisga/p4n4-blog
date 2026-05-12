@@ -1,0 +1,4 @@
+- another assembling of the prototype
+- installing and usage of diet-pi
+- first boot with custom script
+- simulate bootloader (get context from `p4n4-hw`)

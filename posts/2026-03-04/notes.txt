@@ -1,0 +1,69 @@
+- connects ribbon cable to gpio
+- connects usb power connection board
+- connects demo breadboard (humidity sensors and leds)
+- flowchart diagram
+
+```mermaid
+  flowchart TD
+      DEV["Developer / User"]
+
+      DEV -->|"pip install p4n4\np4n4 init / up"| CLI["p4n4
+  CLI\nclient/cli"]
+
+      CLI -->|"scaffold + orchestrate"| NET
+
+      subgraph HW ["Hardware Layer"]
+          SENSORS["Sensors & Devices"]
+          RPI["RPi5\ncore/hw"]
+      end
+
+      SENSORS -->|"MQTT pub"| MOSQ
+  
+      subgraph IOT ["IoT Stack  ·  stacks/iot"]
+          MOSQ["Mosquitto\nMQTT Broker"]
+          MOSQ --> NR["Node-RED\nFlow Engine"]
+          NR --> INFLUX["InfluxDB\nTime-Series DB"]
+          INFLUX --> GRAFANA["Grafana\nDashboards"]
+      end
+
+      subgraph AI ["GenAI Stack  ·  stacks/ai"]
+          N8N["n8n\nAutomation"]
+          OLLAMA["Ollama\nLocal LLM"]
+          LETTA["Letta\nAI Agent"]
+          N8N --> OLLAMA --> LETTA
+      end
+
+      subgraph EDGE ["Edge AI Stack  ·  stacks/edge"]
+          EI["Edge Impulse\nInference Runner"]
+      end
+
+      INFLUX -->|"data queries"| N8N
+      SENSORS -->|"raw sensor data"| EI
+
+      NET(["p4n4-net\nDocker bridge"])
+      IOT -.->|"owns"| NET
+      AI -.->|"attaches"| NET
+      EDGE -.->|"attaches"| NET
+
+      subgraph CLIENTS ["Clients"]
+          API["REST API\nclient/api :8000"]
+          DASH["Web Dashboard\nclient/dashboard"]
+      end
+
+      NET --> API --> DASH
+      DASH --> DEV
+```
+
+  ---
+  How it all fits together:
+  
+  1. Sensors publish data over MQTT to Mosquitto
+  2. Node-RED routes that data into InfluxDB; Grafana visualizes it
+  3. n8n pulls from InfluxDB, feeds queries to Ollama (local LLM) and
+   Letta (AI agent) for intelligent analysis and automation
+  4. Edge Impulse runs ML inference directly on raw sensor data at
+  the edge (independent path)
+  5. All three stacks share p4n4-net — the IoT stack owns it, the
+  others attach to it
+  6. The CLI (p4n4 init / up) scaffolds and orchestrates everything
+  7. The REST API + Dashboard expose data to end users

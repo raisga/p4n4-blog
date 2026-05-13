@@ -4,6 +4,17 @@ import { join, basename, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
 
+marked.use({
+  renderer: {
+    image(href, title, text) {
+      if (/\.mp4$/i.test(href)) {
+        return `<video controls><source src="${href}" type="video/mp4"></video>\n`;
+      }
+      return `<img src="${href}" alt="${text}"${title ? ` title="${title}"` : ''}>\n`;
+    },
+  },
+});
+
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST = join(ROOT, 'dist');
 
@@ -42,7 +53,15 @@ const posts = readdirSync(join(ROOT, 'posts'), { withFileTypes: true })
   .map(id => {
     const raw = readFileSync(join(ROOT, 'posts', id, 'post.md'), 'utf8');
     const { meta, body } = parseFm(raw);
-    return { id, meta, body };
+    const mediaDir = join(ROOT, 'posts', id, 'media');
+    let thumb = null;
+    if (existsSync(mediaDir)) {
+      const imgs = readdirSync(mediaDir)
+        .filter(f => /\.(jpe?g|png|webp|gif)$/i.test(f))
+        .sort();
+      if (imgs.length) thumb = imgs[0];
+    }
+    return { id, meta, body, thumb };
   });
 
 // Generate one static HTML page per post
@@ -83,6 +102,7 @@ const listHtml = posts.length
         <div class="post-title">${p.meta.title || 'Untitled'}</div>
         ${p.meta.excerpt ? `<div class="post-excerpt">${p.meta.excerpt}</div>` : ''}
       </div>
+      ${p.thumb ? `<div class="post-thumb"><img src="posts/${p.id}/media/${p.thumb}" alt=""></div>` : ''}
     </a>
   </li>`).join('')}
 </ul>`

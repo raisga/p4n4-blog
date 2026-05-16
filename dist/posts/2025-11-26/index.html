@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building p4n4: The Beginning — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2025-11-26</div>
+          <div class="post-eyebrow">2025-11-26</div>
+          <h1>Building p4n4: The Beginning</h1>
+          <div class="post-date">November 26, 2025</div>
+        </header>
+        <div class="prose"><p>Every project starts somewhere. For p4n4, it started with a question: what would it actually take to run a full IoT + AI stack entirely on local hardware, no cloud dependency, no monthly bill, no data leaving the network?</p>
+<h2>The Idea</h2>
+<p>The idea is straightforward... A self-hosted platform that handles the whole pipeline... sensors publishing over MQTT, time-series data landing in InfluxDB, Node-RED wiring the logic together, Grafana visualising it, and Ollama running inference locally. All orchestrated through Docker Compose on a embedded Linux system, just like a Raspberry Pi.</p>
+<p>Three stacks: <strong>MING</strong> for IoT, <strong>GenAI</strong> for the LLM layer, and <strong>Edge AI</strong> for on-device inference. The goal is a platform anyone can clone, configure, and bring up in minutes.</p>
+<p>Before writing a single line of compose config, the first session was all hardware: get the Pi physically set up, verify the peripherals work, and establish a workflow for developing against it from a laptop.</p>
+<h2>Initial Setup</h2>
+<p>The first task was getting a clean working environment on the laptop side, a place to write code, push config, and SSH into the Pi without friction.</p>
+<p><img src="media/02_initial-setup.jpg" alt="Initial setup with laptop">
+</p>
+<p>Standard developer workstation prep: SSH keys provisioned and copied to the Pi, <code>~/.ssh/config</code> entry added so <code>ssh p4n4</code> just works, and a local clone of the repo ready to go. The Pi itself was flashed with Raspberry Pi OS Lite (64-bit) using Raspberry Pi Imager, with SSH enabled from the imager&#39;s advanced options so it came up headless on first boot.</p>
+<h2>Using OBS to Monitor the Pi</h2>
+<p>Developing headless against a Pi is fine once things are stable, but in an early stage, it helps to have eyes on what&#39;s happening. You know, the boot messages, kernel output, service logs scrolling by... Instead of connecting the Pi to a monitor, I used a OBS Studio set up on my laptop to capture and display the Pi&#39;s HDMI output over a capture card. This is because it&#39;s easier to carry my laptop instead of a stand-alone monitor just for the Raspberry Pi :)</p>
+<p><img src="media/01_streaming-rpi.jpg" alt="Streaming RPi output via OBS">
+</p>
+<p>OBS made it easy to confirm the Pi was booting cleanly, watch systemd service startup, and catch any early errors without needing a dedicated screen. As a quick sanity check that the capture was working before attaching the Pi, a test streaming was displayed.</p>
+<p><img src="media/00_cute-cat.jpg" alt="Test image on OBS stream">
+</p>
+<p>Once the stream was confirmed to be live, the capture card was switched to the Pi&#39;s HDMI output. From here on, the laptop handled both development and monitoring in one window.</p>
+<h2>Connecting the USB Hard Drive</h2>
+<p>One of the key hardware requirements for p4n4 is persistent, high-capacity local storage. We can save videos recording, and also the InfluxDB time-series data accumulates fast, and keeping it on the Pi&#39;s SD card can be both slow and risky (data loss or corruption). The plan is to mount a USB hard drive as the data volume for the project. I choose a 1TB Seagate USB 3.0 Hard Drive.</p>
+<p><img src="media/03_hdd-connected.jpg" alt="USB hard drive connected to the Pi">
+</p>
+<p>The drive was connected, identified with <code>lsblk</code>, formatted to ext4, and mounted at <code>/mnt/p4n4-data</code>. A quick write/read test confirmed throughput was acceptable. The mount was added to <code>/etc/fstab</code> with <code>nofail</code> so a missing drive doesn&#39;t block boot.</p>
+<h2>Connecting the Raspberry Pi Camera Module</h2>
+<p>The camera is intended for the Edge AI side of the platform. Streaming frames to an inference pipeline running Edge Impulse. Getting it wired up and confirmed working early removes a lot of headaches later!</p>
+<p><img src="media/04_camera-connected.jpg" alt="Raspberry Pi camera module connected">
+</p>
+<p>The camera was connected through the Pi 5&#39;s MIPI CSI port, enabled via <code>raspi-config</code>, and tested with <code>rpicam-still -o test.jpg</code>. The image came back clean. The camera is now a confirmed, available peripheral integration with the Edge AI stack comes later.</p>
+<h2>What&#39;s Next</h2>
+<p>With the physical stack assembled and verified, the next session moves into software: getting Docker and Compose installed on the Pi, bringing up the IoT stack for the first time, and wiring the first sensor data through the MING pipeline.</p>
+<p>The hardware side is done... Now time to write some config and code! :D</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>

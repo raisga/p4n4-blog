@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stack Up, Brainstorming the Board — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2026-02-11</div>
+          <div class="post-eyebrow">2026-02-11</div>
+          <h1>Stack Up, Brainstorming the Board</h1>
+          <div class="post-date">February 11, 2026</div>
+        </header>
+        <div class="prose"><p>Hardware sorted. Time to actually write some config.</p>
+<p>This session split into two areas: the software side, getting Docker running on the Pi and bringing up the MING stack for the first time... and the hardware side, designing and assembling the first GPIO test board. The board isn&#39;t connected to the Pi yet, but the pipeline is confirmed and ready, so the first real sensor data run is the obvious next step.</p>
+<h2>Getting Docker on the Pi</h2>
+<p>Raspberry Pi OS Lite doesn&#39;t ship with Docker, but the official install script gets both Docker Engine and Compose v2 in one go. After adding the current user to the <code>docker</code> group and re-logging in, a quick <code>docker run hello-world</code> confirmed everything was working.</p>
+<p>One thing worth noting on the Pi 5 running bookworm: cgroup v2 is enabled by default, and Docker handles it cleanly. No <code>/boot/cmdline.txt</code> edits, no kernel flags. Things have gotten a lot smoother since the Pi 4 days... hehe ;)</p>
+<p>Compose ships as part of Docker Engine now, available as <code>docker compose</code>. This matters because the MING stack&#39;s <code>Makefile</code> calls it that throughout.</p>
+<h2>Bringing Up the MING Stack for the First Time</h2>
+<p>With Docker running, the stack is a <code>git clone</code> and a <code>make up</code> away. The first run took a few minutes on the Pi while Docker pulled the four images... Mosquitto, InfluxDB, Node-RED, Grafana. Then services came up in dependency order: Mosquitto and InfluxDB first, Node-RED waits for both their healthchecks to pass, Grafana waits on InfluxDB. The compose file has proper healthchecks defined for every service, so nothing starts against a half-ready dependency. This is one of those small things that matters a lot when it&#39;s 3am when you&#39;re losing sleep because you&#39;re busy debugging something lol.</p>
+<p><code>make status</code> showed everything green. Grafana on port 3000, Node-RED on 1880, InfluxDB on 8086, all accessible from the laptop over SSH. MING was live... it&#39;s alive! :D</p>
+<p>The <code>flows.json</code> pre-loaded in Node-RED was already wired: a single <code>MING IoT Pipeline</code> tab with <code>sensors/#</code> and <code>inference/#</code> subscriptions both routing into InfluxDB&#39;s <code>raw_telemetry</code> bucket, plus a <code>sandbox/#</code> path for dev use. No manual flow setup needed.</p>
+<p>A <code>make test-mqtt</code> published a test temperature reading to <code>sensors/temperature</code>. Node-RED&#39;s debug panel showed it land. InfluxDB received the write. The pipeline worked on the first try, which felt great.</p>
+<h2>Building the GPIO Test Board</h2>
+<p>Stack running, pipeline confirmed. Now for the part that makes this more than just a containerized demo: real sensor data from real hardware.</p>
+<p>Before touching anything on the breadboard, the circuit got sketched out first.</p>
+<p><img src="media/00_brainstorming-circuit.jpg" alt="Brainstorming the circuit">
+</p>
+<p>The goal was straightforward: wire a humidity sensor to the Pi&#39;s GPIO header, read the value in Python, and publish it over MQTT to <code>sensors/humidity</code>. Have some LEDs in place to indicate the humidity or temperature levels. The brainstorming phase was mostly about pin assignments and whether a pull-up resistor was needed on the data line before committing anything to the board.</p>
+<p><img src="media/01_designing-circuit.jpg" alt="Designing the circuit">
+</p>
+<p>From rough sketch to an actual wiring diagram. Easy to skip this step when you just want to get something plugged in, but getting the layout on paper first makes the physical build faster and avoids rewiring and debugging mid-session.</p>
+<p><img src="media/02_putting-it-together.jpg" alt="Putting it all together">
+</p>
+<p>With the design settled, the board came together quickly. Sensor to GPIO pins, power and ground in place, pull-up resistor on the data line. The test board is assembled and mostly ready... just not yet connected to the Raspberry Pi.</p>
+<h2>What&#39;s Next</h2>
+<p>MING is up and the pipeline is confirmed with <code>make test-mqtt</code>. The GPIO test board is built. The next session is where these two things actually meet: connect the board to the Pi, read the humidity sensor over GPIO, and push the first real reading through MQTT into InfluxDB. The Node-RED flow is already subscribed to <code>sensors/#</code>, so the plumbing is implemented in some way.</p>
+<p>After that, the <code>p4n4-hw</code> GPIO scripts are next in line, boot sequence indicators, service health monitoring via LED, the physical button handler.</p>
+<p>Config written. Board built. Now to connect the two.</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>

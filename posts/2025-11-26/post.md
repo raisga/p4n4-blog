@@ -1,16 +1,16 @@
 ---
 title: Building p4n4: The Beginning
 date: 2025-11-26
-excerpt: Every project starts somewhere... This one started with a question about local-first IoT and AI, and a first session spent turning raw hardware into something you can actually build on.
+excerpt: Every project starts somewhere... This one started with a question about IoT wtih local-first AI.
 ---
 
 Every project starts somewhere. For p4n4, it started with a question: what would it actually take to run a full IoT + AI stack entirely on local hardware, no cloud dependency, no monthly bill, no data leaving the network?
 
 ## The Idea
 
-The premise is straightforward but deceptively ambitious. A self-hosted platform that handles the whole pipeline... sensors publishing over MQTT, time-series data landing in InfluxDB, Node-RED wiring the logic together, Grafana visualising it, and Ollama running inference locally. All orchestrated through Docker Compose on a embedded Linux system... like a Raspberry Pi.
+The idea is straightforward... A self-hosted platform that handles the whole pipeline... sensors publishing over MQTT, time-series data landing in InfluxDB, Node-RED wiring the logic together, Grafana visualising it, and Ollama running inference locally. All orchestrated through Docker Compose on a embedded Linux system, just like a Raspberry Pi.
 
-Three stacks: **MING** for IoT, **GenAI** for the language model layer, and **Edge AI** for on-device inference. The hardware used is a Raspberry Pi 5. The goal is a platform anyone can clone, configure, and bring up in minutes.
+Three stacks: **MING** for IoT, **GenAI** for the LLM layer, and **Edge AI** for on-device inference. The goal is a platform anyone can clone, configure, and bring up in minutes.
 
 Before writing a single line of compose config, the first session was all hardware: get the Pi physically set up, verify the peripherals work, and establish a workflow for developing against it from a laptop.
 
@@ -24,7 +24,7 @@ Standard developer workstation prep: SSH keys provisioned and copied to the Pi, 
 
 ## Using OBS to Monitor the Pi
 
-Developing headless against a Pi is fine once things are stable, but in early bringup it helps to have eyes on what's happening. You know, the boot messages, kernel output, service logs scrolling by... Rather than connecting a monitor, OBS Studio was set up on the laptop to capture and display the Pi's HDMI output over a capture card. This is mostly on my side, as it's easier to carry my laptop instead of a stand-alone monitor just for the Raspberry Pi :)
+Developing headless against a Pi is fine once things are stable, but in an early stage, it helps to have eyes on what's happening. You know, the boot messages, kernel output, service logs scrolling by... Instead of connecting the Pi to a monitor, I used a OBS Studio set up on my laptop to capture and display the Pi's HDMI output over a capture card. This is because it's easier to carry my laptop instead of a stand-alone monitor just for the Raspberry Pi :)
 
 ![Streaming RPi output via OBS](media/01_streaming-rpi.jpg)
 
@@ -32,11 +32,11 @@ OBS made it easy to confirm the Pi was booting cleanly, watch systemd service st
 
 ![Test image on OBS stream](media/00_cute-cat.jpg)
 
-Once the stream was confirmed live, the capture card was switched to the Pi's HDMI output. From here on, the laptop handled both development and monitoring in one window.
+Once the stream was confirmed to be live, the capture card was switched to the Pi's HDMI output. From here on, the laptop handled both development and monitoring in one window.
 
 ## Connecting the USB Hard Drive
 
-One of the key hardware requirements for p4n4 is persistent, high-capacity local storage. We can save videos recording, and also the InfluxDB time-series data accumulates fast, and keeping it on the Pi's SD card is both slow and risky. The plan is to mount a USB hard drive as the data volume for the project. I choose a 1TB Seagate USB 3.0 Hard Drive.
+One of the key hardware requirements for p4n4 is persistent, high-capacity local storage. We can save videos recording, and also the InfluxDB time-series data accumulates fast, and keeping it on the Pi's SD card can be both slow and risky (data loss or corruption). The plan is to mount a USB hard drive as the data volume for the project. I choose a 1TB Seagate USB 3.0 Hard Drive.
 
 ![USB hard drive connected to the Pi](media/03_hdd-connected.jpg)
 
@@ -54,4 +54,4 @@ The camera was connected through the Pi 5's MIPI CSI port, enabled via `raspi-co
 
 With the physical stack assembled and verified, the next session moves into software: getting Docker and Compose installed on the Pi, bringing up the IoT stack for the first time, and wiring the first sensor data through the MING pipeline.
 
-The hardware side is done. Time to write some config! :D
+The hardware side is done... Now time to write some config and code! :D

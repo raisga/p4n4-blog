@@ -1,6 +1,0 @@
-Notes:
-
-- Publish python project to PyPi
-- tag as V0.0.1
-- try it out from the package manager
-- write some observations (process to publish via github actions, etc...)

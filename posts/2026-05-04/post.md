@@ -1,12 +1,12 @@
 ---
 title: Six Sensors, Six Breadboards
 date: 2026-05-04
-excerpt: The sensor set expands. Six new modules get organized, assigned to their own breadboards, and sketched into circuits. Plus a look at two KiCad tools that could change how the PCB work gets done.
+excerpt: The sensor set expands with six new modules assigned to their own breadboards, and sketched into circuits.
 ---
 
-The dev board is built and the GPIO scripts are running. The platform has a solid base. Now it's time to add more things for it to actually sense.
+The dev board is still a work in progress, but it's taking shape! The GPIO scripts are running, and the platform has a solid base. Now it's time to add more things for it to actually sense.
 
-This session was about expanding the sensor layer: six new modules, one breadboard each, and the circuit ideas to hook them all up to the Pi.
+This post was about expanding the sensor layer: six new modules using one breadboard for each one, and the circuit ideas to hook them all up to the Pi.
 
 ## The Sensor Set
 
@@ -16,7 +16,7 @@ The sensors were pulled from stock and organized before anything got wired.
 
 ![Sensors organized in labeled bags](media/03_sensors-bag-labeled.jpeg)
 
-Keeping sensors in labeled bags seems like overkill until you've spent twenty minutes hunting for the right module in a pile of similar-looking components. Each sensor got its own bag before anything else happened.
+Keeping sensors in labeled bags seems like overkill until you've spent twenty minutes hunting for the right module in a pile of similar-looking components! Each sensor got its own bag before anything else happened.
 
 The six modules for this session:
 
@@ -31,13 +31,13 @@ Each of these will publish readings on a `sensors/` MQTT topic once they're wire
 
 ## Six Breadboards
 
-Rather than crowding everything onto one board and creating a debugging nightmare, each sensor got its own dedicated breadboard.
+Rather than crowding everything onto one board and creating a debugging nightmare, each sensor got its own dedicated breadboard. THis way we can also keep a modular approach for demos.
 
 ![Six breadboards laid out](media/00_breadboards-six.jpeg)
 
 ![Breadboards with sensor assignments](media/01_breadboards-assigned.jpeg)
 
-One board, one sensor. Labels on each board match the labeled bags. This makes it easy to pick up a single circuit, work on it, and set it back down without disturbing anything else.
+One board, one sensor. Labels on each board match the labeled bags. This makes it easy to pick up a single circuit, work on it, and set it back down.
 
 With the assignments settled, the sensors went onto their boards.
 
@@ -49,18 +49,16 @@ The photoresistor board is the most involved circuit of the six since it needs t
 
 ## A Look at Two KiCad Tools
 
-With six new breadboard circuits sketched out, the eventual path for all of them is onto proper PCBs. The KiCad project in `core/hw/dev-board/` is where that work lives. Two tools came up during research this session that are worth tracking.
+With six new breadboard circuits sketched out, the eventual path for all of them is onto proper PCBs. The KiCad projects in `core/hw/dev-board/demos/` (from the umbrella repo, `p4n4/`) is where that work lives. Two tools came up during research this session that are worth tracking.
 
 The first is [kicad-happy](https://github.com/aklofas/kicad-happy), a curated KiCad component library. Having reliable symbols and footprints for common modules like the ones used here saves the time of sourcing or drawing them from scratch. For sensors that are off the shelf and widely used, a shared library like this is a practical shortcut.
 
-The second is [KiCAD-MCP-Server](https://github.com/mixelpixx/KiCAD-MCP-Server), an MCP server that exposes KiCad operations to AI tools. This one is interesting in the context of p4n4 specifically. The project is already running a local LLM stack with Ollama, so the idea of connecting that to the PCB design workflow is a natural fit. An AI assistant that can query the schematic, suggest component placements, or validate netlist connections locally, without sending design files to an external service, is exactly the kind of tool the platform is built to support.
+The second is [KiCAD-MCP-Server](https://github.com/mixelpixx/KiCAD-MCP-Server), an MCP server that exposes KiCad operations to AI tools. This one is interesting in the context of p4n4 specifically. The project is already running a local LLM stack with Ollama, so the idea of connecting that to the PCB design workflow is actually interesting, like a natural fit. An AI assistant that can query the schematic, suggest component placements, or validate netlist connections locally, without sending design files to an external service. This could be a usecase for the kind of tool the platform is built to support.
 
-Neither tool gets integrated this session. But they're on the list.
+Neither tool gets integrated this session. But they're on the list... I still need to play with them to see how useful they could be for this project.
 
 ## What's Next
 
 Six circuits are sketched and six sensors are on their boards. The next step is writing the GPIO scripts for each one: reading values, publishing over MQTT, and watching the data land in InfluxDB. The photoresistor and servo circuits have the most complexity; the reed switch and tilt sensor can probably be done in an afternoon.
 
-After the sensor scripts are solid, the GenAI stack comes up: Ollama, Letta, and n8n joining the network. That's the session where the AI layer stops being a diagram and starts being a process.
-
-More sensors. More data. More to work with.
+After the sensor scripts are solid, the GenAI stack comes up... this is for real this time... I hope.. this project have a lot of moving parts, I hope you understand :S

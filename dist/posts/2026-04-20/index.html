@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Dev Board Takes Shape — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2026-04-20</div>
+          <div class="post-eyebrow">2026-04-20</div>
+          <h1>The Dev Board Takes Shape</h1>
+          <div class="post-date">April 20, 2026</div>
+        </header>
+        <div class="prose"><p>Scripts running, OS sorted, prototype confirmed. The next problem was physical: everything was still just components sitting on a desk.... This session was about fixing that. Designing what gets soldered onto the dev board, and building the wooden base that holds the whole platform together.</p>
+<h2>Brainstorming the Protoboard</h2>
+<p>Before touching the soldering iron, time was spent on what actually belongs on the perfboard. The breadboard circuit works, but breadboards are not permanent. Every connection is one bump away from a false contact, and the platform is supposed to run unattended!</p>
+<p>The goal was a clean, solderable version of the LED indicator circuit: a status LED, a button, passiev components like resistors, and header pins to be connected with the GPIO breakout. A KiCad schematic idea file already existed in <code>core/hw/prototypes/leds-indicator/</code> from an earlier design pass, but it wasn&#39;t finished. This session was to finish and to translate that that into physical solder joints on a perfboard.</p>
+<p>The questions to work out: which components go on the perfboard now versus waiting for a proper PCB run, how to arrange the layout so the header pins align with the GPIO breakout, and whether the perfboard needs a mounting hole pattern that fits the wood base.</p>
+<h2>The Wood Base</h2>
+<p>The bigger project for this session was the wood base itself. The platform needed a fixed, stable surface that everything mounts to: Pi 5, USB hard drive, power outlet, USB hub, cameras, perfboard, and GPIO communication board. A wooden panel gives physical structure without requiring custom metalwork.</p>
+<p><img src="media/00_initial-mount.jpg" alt="Initial mount">
+</p>
+<p>The initial mount was about getting the layout right before committing to screw holes. Spacing matters here. The Pi&#39;s USB and Ethernet ports need to stay accessible, the hard drive needs airflow clearance, and the cable runs between components should be short and tidy.</p>
+<p>Component placement settled on:</p>
+<ul>
+<li><strong>Raspberry Pi 5</strong> at the center, GPIO header facing toward the GPIO breakout board</li>
+<li><strong>1TB USB hard drive</strong> mounted to the side, cable running directly to a USB port</li>
+<li><strong>USB hub</strong> underneath the Raspberry Pi, providing power supply and expansion ports for other peripherals</li>
+<li><strong>Cameras</strong> positioned at the front edge, the USB camera angled for a clean field of view</li>
+<li><strong>Power outlet board</strong> at the back, feeding the Pi, hub and everything else from a single cable in</li>
+<li><strong>GPIO communication board</strong> alongside the Pi&#39;s header, ribbon cable kept short</li>
+<li><strong>Protoboard</strong> with the LED indicator circuit, mounted adjacent to the GPIO board</li>
+</ul>
+<h2>Perfboard Work</h2>
+<p>With the layout settled, the perfboard got its first real solder work.</p>
+<p><img src="media/01_perfboard1.jpg" alt="Perfboard build, first pass">
+</p>
+<p><img src="media/02_perfboard2.jpg" alt="Perfboard build, second pass">
+</p>
+<p>The indicator circuit is straightforward: a single LED on GPIO17 with a 330-ohm resistor to ground. The header pin row lines up with the T-type GPIO breakout so the board seats directly without flying leads. Soldering on perfboard takes waaay longer than placing on a breadboard, but the results are solid. No connections shift under vibration, no pins pull out from handling...</p>
+<p>The plan is still to move this to a proper PCB once the design is stable. The KiCad project in <code>dev-board/</code> is where that ends up. For now the perfboard is the right level of permanence: committed but adjustable if the design needs to change.</p>
+<h2>The Complete Dev Board</h2>
+<p>With all the components positioned and the perfboard soldered, everything went onto the wood base.</p>
+<p><img src="media/03_complete-dev-board.jpg" alt="Complete dev board">
+</p>
+<p>The result is a self-contained unit. Everything in a fixed position, cable runs short and managed, all ports still accessible. Picking it up and setting it back down doesn&#39;t disturb a single connection. That&#39;s the actual goal: a platform that behaves consistently across sessions without a setup ritual at the start of each one.</p>
+<h2>What&#39;s Next</h2>
+<p>The physical platform is done. The dev board is starting to take shape... a real thing now, not a pile of parts. The next sessions turn back to software: the remaining GPIO scripts (health monitor, button handler, MQTT indicator) and then the GenAI stack coming up for the first time (for real this time!).</p>
+<p>The hardware work paid off. Everything that comes next builds on a stable base.</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Six Sensors, Six Breadboards — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2026-05-04</div>
+          <div class="post-eyebrow">2026-05-04</div>
+          <h1>Six Sensors, Six Breadboards</h1>
+          <div class="post-date">May 4, 2026</div>
+        </header>
+        <div class="prose"><p>The dev board is still a work in progress, but it&#39;s taking shape! The GPIO scripts are running, and the platform has a solid base. Now it&#39;s time to add more things for it to actually sense.</p>
+<p>This post was about expanding the sensor layer: six new modules using one breadboard for each one, and the circuit ideas to hook them all up to the Pi.</p>
+<h2>The Sensor Set</h2>
+<p>The sensors were pulled from stock and organized before anything got wired.</p>
+<p><img src="media/02_sensors-box.jpeg" alt="Sensors in a box">
+</p>
+<p><img src="media/03_sensors-bag-labeled.jpeg" alt="Sensors organized in labeled bags">
+</p>
+<p>Keeping sensors in labeled bags seems like overkill until you&#39;ve spent twenty minutes hunting for the right module in a pile of similar-looking components! Each sensor got its own bag before anything else happened.</p>
+<p>The six modules for this session:</p>
+<ul>
+<li><strong>Laser Emitter + Servo Motor</strong> -- a laser diode on a servo, giving the platform a sweepable beam for presence detection or line-of-sight distance sensing. The servo connects to a PWM-capable GPIO pin; the laser emitter is a simple digital on/off.</li>
+<li><strong>Photoresistor</strong> -- a light-dependent resistor for ambient light sensing. The Pi doesn&#39;t have a built-in ADC, so this will need a voltage divider into an MCP3008 or similar SPI ADC chip to produce a readable value.</li>
+<li><strong>Tilt Switch</strong> -- a small ball-bearing tilt sensor that closes a circuit when tilted past a threshold. Reads as a digital GPIO input. Useful for tamper detection or orientation events.</li>
+<li><strong>IR Receiver</strong> -- a TSOP-style infrared receiver that can decode signals from standard remote controls. Outputs a demodulated digital signal on a single GPIO pin.</li>
+<li><strong>Tap Module</strong> -- a piezoelectric knock sensor. Detects physical impacts on a surface. Reads as a digital pulse on GPIO, no ADC needed.</li>
+<li><strong>Mini Reed Switch</strong> -- a magnetically actuated switch. Closes when a magnet is nearby. Classic door or window sensor, or anything where you want to detect the presence of a magnet without contact.</li>
+</ul>
+<p>Each of these will publish readings on a <code>sensors/</code> MQTT topic once they&#39;re wired and scripted. The Node-RED flow is already subscribed to <code>sensors/#</code>, so the pipeline is ready and waiting.</p>
+<h2>Six Breadboards</h2>
+<p>Rather than crowding everything onto one board and creating a debugging nightmare, each sensor got its own dedicated breadboard. THis way we can also keep a modular approach for demos.</p>
+<p><img src="media/00_breadboards-six.jpeg" alt="Six breadboards laid out">
+</p>
+<p><img src="media/01_breadboards-assigned.jpeg" alt="Breadboards with sensor assignments">
+</p>
+<p>One board, one sensor. Labels on each board match the labeled bags. This makes it easy to pick up a single circuit, work on it, and set it back down.</p>
+<p>With the assignments settled, the sensors went onto their boards.</p>
+<p><img src="media/04_breadboards-sensors.jpeg" alt="Breadboards with sensors placed">
+</p>
+<p><img src="media/05_initial-demo-breadboards.jpeg" alt="Initial demo breadboard layout">
+</p>
+<p>The photoresistor board is the most involved circuit of the six since it needs the ADC chip in the loop. The rest are straightforward: power, ground, signal to GPIO, pull-up or pull-down resistor where needed. The servo adds a PWM requirement, but the Pi 5 handles hardware PWM on several GPIO pins without needing an external driver.</p>
+<h2>A Look at Two KiCad Tools</h2>
+<p>With six new breadboard circuits sketched out, the eventual path for all of them is onto proper PCBs. The KiCad projects in <code>core/hw/dev-board/demos/</code> (from the umbrella repo, <code>p4n4/</code>) is where that work lives. Two tools came up during research this session that are worth tracking.</p>
+<p>The first is <a href="https://github.com/aklofas/kicad-happy">kicad-happy</a>, a curated KiCad component library. Having reliable symbols and footprints for common modules like the ones used here saves the time of sourcing or drawing them from scratch. For sensors that are off the shelf and widely used, a shared library like this is a practical shortcut.</p>
+<p>The second is <a href="https://github.com/mixelpixx/KiCAD-MCP-Server">KiCAD-MCP-Server</a>, an MCP server that exposes KiCad operations to AI tools. This one is interesting in the context of p4n4 specifically. The project is already running a local LLM stack with Ollama, so the idea of connecting that to the PCB design workflow is actually interesting, like a natural fit. An AI assistant that can query the schematic, suggest component placements, or validate netlist connections locally, without sending design files to an external service. This could be a usecase for the kind of tool the platform is built to support.</p>
+<p>Neither tool gets integrated this session. But they&#39;re on the list... I still need to play with them to see how useful they could be for this project.</p>
+<h2>What&#39;s Next</h2>
+<p>Six circuits are sketched and six sensors are on their boards. The next step is writing the GPIO scripts for each one: reading values, publishing over MQTT, and watching the data land in InfluxDB. The photoresistor and servo circuits have the most complexity; the reed switch and tilt sensor can probably be done in an afternoon.</p>
+<p>After the sensor scripts are solid, the GenAI stack comes up... this is for real this time... I hope.. this project have a lot of moving parts, I hope you understand :S</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>

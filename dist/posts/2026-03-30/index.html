@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DietPi, Rebuilt, First Blink — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2026-03-30</div>
+          <div class="post-eyebrow">2026-03-30</div>
+          <h1>DietPi, Rebuilt, First Blink</h1>
+          <div class="post-date">March 30, 2026</div>
+        </header>
+        <div class="prose"><p>A few things needed addressing before moving forward. The prototype assembly was a bit rough, the OS choice was worth revisiting, and the first GPIO script was ready to run. This post will covered all three of them.</p>
+<h2>A Cleaner Assembly</h2>
+<p>Before getting into software, the hardware got another pass.</p>
+<p><img src="media/00_asembled-new-ver.jpg" alt="Assembled new version">
+</p>
+<p>The previous wiring was functional but messy. Cables running at odd angles, the breadboard not quite seated right. This round was about tightening it up: ribbon cable routed cleanly, power board seated properly, breadboard locked in.</p>
+<p><img src="media/01_breadboard-view.jpg" alt="Breadboard view">
+</p>
+<p><img src="media/04_assembled4.jpg" alt="Assembled view">
+</p>
+<p>Cleaner wiring makes debugging faster... When something stops working, you want to be able to see immediately whether it&#39;s a loose connection, not spend five minutes tracing cable runs.</p>
+<h2>Using an Extra Camera</h2>
+<p>I connect another camera to the Pi, an old Logitech USB Webcam that my mom had around from an older computer. This is because I wanted to have more options to use when working with computer or artificial vision projects.</p>
+<h2>Switching to DietPi</h2>
+<p>Raspberry Pi OS Lite was the obvious starting point, but for a platform that&#39;s going to run 24/7 with multiple Docker stacks, it carries more overhead than needed. DietPi is a stripped-down Debian-based image designed specifically for embedded and always-on use. Much lower baseline RAM usage, no unnecessary services running, and a fast automated install system for adding only what you actually need.</p>
+<p>Flashed, booted, first screen.</p>
+<p><img src="media/02_boot-diet-pi.jpg" alt="Booting DietPi">
+</p>
+<p>DietPi&#39;s first-boot setup is interactive: it walks through locale, timezone, SSH configuration, and password setup before dropping you at a desktop. The <code>dietpi-software</code> tool handles everything else, there&#39;s no need to manually hunt down packages.</p>
+<p><img src="media/03_diet-pi-setup.jpg" alt="DietPi setup">
+</p>
+<p><img src="media/05_diet-pi-welcome-screen.jpg" alt="DietPi welcome screen">
+</p>
+<p>The welcome screen gives a quick system summary: CPU temp, memory usage, uptime. On a fresh install with nothing running, the Pi was sitting at around 8% RAM used. That&#39;s the kind of headroom you want when you&#39;re about to stack Docker containers on top.</p>
+<h2>The Boot Simulation Script</h2>
+<p>With the OS sorted and Docker installed, the first <code>p4n4-hw</code> script was ready to run: <code>p4n4_boot_sim.py</code>. The idea is simple, a single LED on GPIO17 blinks through patterns that represent each possible startup phase of the p4n4 platform. Fast short pulses for POST, slower deliberate blinks for kernel loading, a burst pattern for network bridge configuration, one blink per service as each stack comes up. When everything is healthy, the LED goes solid.</p>
+<p>The phases in order:</p>
+<ol>
+<li>Power-on self-test (12 rapid blinks)</li>
+<li>Bootloader init (6 blinks)</li>
+<li>Kernel load and filesystem mount (8 blinks total)</li>
+<li>System services: syslog, udev, i2c, spi, gpio-daemon, Docker (one blink each)</li>
+<li>Network bridge configuration, <code>p4n4-net</code> at <code>172.20.0.0/16</code> (burst pattern)</li>
+<li>IoT stack: Mosquitto, InfluxDB, Node-RED, Grafana (one blink each)</li>
+<li>GenAI stack: Ollama, Letta, n8n (one blink each)</li>
+<li>Edge AI stack: Edge Impulse runner (one blink)</li>
+<li>p4n4-api (one blink)</li>
+<li>Boot complete: three rapid pulses, then solid on</li>
+</ol>
+<p><img src="media/06_python-script.jpg" alt="Python script">
+</p>
+<p><img src="media/07_python-script2.jpg" alt="Python script output">
+</p>
+<p>The script uses <code>RPi.GPIO</code> in BCM mode and a shared <code>p4n4_common</code> module that handles all the GPIO primitives: <code>blink</code>, <code>burst</code>, <code>fade_out</code>, <code>led_on</code>, <code>led_off</code>. The common module also has a TCP health probe function that checks each service&#39;s port... that one will matter more once the actual stacks are running.</p>
+<p>Running <code>python3 p4n4_boot_sim.py</code> for the first time and watching the LED sequence play out was one of those moments that makes the whole project feel real. A blinking LED is not impressive on its own, but this one is narrating a platform startup. Each blink means something.</p>
+<p><video controls><source src="media/08_simulated-boot-led.mp4" type="video/mp4"></video>
+</p>
+<h2>Storage and Housing</h2>
+<p>With the Pi running cleanly and the first script confirmed, the assembled rig went into a basket for storage between sessions.</p>
+<p><img src="media/09_basket-storage.jpg" alt="Basket storage">
+</p>
+<p>Not the most technical note, but keeping everything together in one place saves the ten minutes of hunting for cables and boards at the start of every session.</p>
+<h2>What&#39;s Next</h2>
+<p>The boot simulation works. The OS is leaner and better suited to the platform. Next up is the health monitor script, <code>p4n4_health_monitor.py</code>, which runs on an interval and probes every service port in the stack. Red LED pattern for degraded, solid on for healthy. After that, the button handler and MQTT indicator scripts round out the GPIO layer... and then the GenAI stack comes up for real.</p>
+<p>As the LED blinks, the platform breathes. :P</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>

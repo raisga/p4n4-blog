@@ -1,10 +1,10 @@
 ---
 title: DietPi, Rebuilt, First Blink
 date: 2026-03-30
-excerpt: The prototype gets a cleaner assembly, the OS gets swapped out for DietPi, and the first GPIO script runs: a boot simulation that blinks the LED through every platform startup phase.
+excerpt: The prototype gets a cleaner assembly, the OS gets swapped out for DietPi, and the first GPIO script runs.
 ---
 
-A few things needed addressing before moving forward. The prototype assembly was a bit rough, the OS choice was worth revisiting, and the first GPIO script was ready to run. This session covered all three.
+A few things needed addressing before moving forward. The prototype assembly was a bit rough, the OS choice was worth revisiting, and the first GPIO script was ready to run. This post will covered all three of them.
 
 ## A Cleaner Assembly
 
@@ -18,7 +18,11 @@ The previous wiring was functional but messy. Cables running at odd angles, the 
 
 ![Assembled view](media/04_assembled4.jpg)
 
-Cleaner wiring makes debugging faster. When something stops working, you want to be able to see immediately whether it's a loose connection, not spend five minutes tracing cable runs.
+Cleaner wiring makes debugging faster... When something stops working, you want to be able to see immediately whether it's a loose connection, not spend five minutes tracing cable runs.
+
+## Using an Extra Camera
+
+I connect another camera to the Pi, an old Logitech USB Webcam that my mom had around from an older computer. This is because I wanted to have more options to use when working with computer or artificial vision projects.
 
 ## Switching to DietPi
 
@@ -34,11 +38,11 @@ DietPi's first-boot setup is interactive: it walks through locale, timezone, SSH
 
 ![DietPi welcome screen](media/05_diet-pi-welcome-screen.jpg)
 
-The welcome screen gives a quick system summary: CPU temp, memory usage, uptime. On a fresh install with nothing running, the Pi was sitting at around 50MB RAM used. That's the kind of headroom you want when you're about to stack Docker containers on top.
+The welcome screen gives a quick system summary: CPU temp, memory usage, uptime. On a fresh install with nothing running, the Pi was sitting at around 8% RAM used. That's the kind of headroom you want when you're about to stack Docker containers on top.
 
 ## The Boot Simulation Script
 
-With the OS sorted and Docker installed, the first `p4n4-hw` script was ready to run: `p4n4_boot_sim.py`. The idea is simple but satisfying. A single LED on GPIO17 blinks through patterns that represent each startup phase of the p4n4 platform. Fast short pulses for POST, slower deliberate blinks for kernel loading, a burst pattern for network bridge configuration, one blink per service as each stack comes up. When everything is healthy, the LED goes solid.
+With the OS sorted and Docker installed, the first `p4n4-hw` script was ready to run: `p4n4_boot_sim.py`. The idea is simple, a single LED on GPIO17 blinks through patterns that represent each possible startup phase of the p4n4 platform. Fast short pulses for POST, slower deliberate blinks for kernel loading, a burst pattern for network bridge configuration, one blink per service as each stack comes up. When everything is healthy, the LED goes solid.
 
 The phases in order:
 
@@ -75,4 +79,4 @@ Not the most technical note, but keeping everything together in one place saves 
 
 The boot simulation works. The OS is leaner and better suited to the platform. Next up is the health monitor script, `p4n4_health_monitor.py`, which runs on an interval and probes every service port in the stack. Red LED pattern for degraded, solid on for healthy. After that, the button handler and MQTT indicator scripts round out the GPIO layer... and then the GenAI stack comes up for real.
 
-The LED blinks. The platform breathes.
+As the LED blinks, the platform breathes. :P

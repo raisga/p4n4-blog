@@ -18,7 +18,7 @@ Compose ships as part of Docker Engine now, available as `docker compose`. This 
 
 ## Bringing Up the MING Stack for the First Time
 
-With Docker running, the stack is a `git clone` and a `make up` away. The first run took a few minutes on the Pi while Docker pulled the four images... Mosquitto, InfluxDB, Node-RED, Grafana. Then services came up in dependency order: Mosquitto and InfluxDB first, Node-RED waits for both their healthchecks to pass, Grafana waits on InfluxDB. The compose file has proper healthchecks defined for every service, so nothing starts against a half-ready dependency. This is one of those small things that matters a lot at 2am when you're debugging something.
+With Docker running, the stack is a `git clone` and a `make up` away. The first run took a few minutes on the Pi while Docker pulled the four images... Mosquitto, InfluxDB, Node-RED, Grafana. Then services came up in dependency order: Mosquitto and InfluxDB first, Node-RED waits for both their healthchecks to pass, Grafana waits on InfluxDB. The compose file has proper healthchecks defined for every service, so nothing starts against a half-ready dependency. This is one of those small things that matters a lot when it's 3am when you're losing sleep because you're busy debugging something lol.
 
 `make status` showed everything green. Grafana on port 3000, Node-RED on 1880, InfluxDB on 8086, all accessible from the laptop over SSH. MING was live... it's alive! :D
 
@@ -38,7 +38,7 @@ The goal was straightforward: wire a humidity sensor to the Pi's GPIO header, re
 
 ![Designing the circuit](media/01_designing-circuit.jpg)
 
-From rough sketch to an actual wiring diagram. Easy to skip this step when you just want to get something plugged in, but getting the layout on paper first makes the physical build faster and avoids rewiring mid-session.
+From rough sketch to an actual wiring diagram. Easy to skip this step when you just want to get something plugged in, but getting the layout on paper first makes the physical build faster and avoids rewiring and debugging mid-session.
 
 ![Putting it all together](media/02_putting-it-together.jpg)
 
@@ -46,8 +46,8 @@ With the design settled, the board came together quickly. Sensor to GPIO pins, p
 
 ## What's Next
 
-MING is up and the pipeline is confirmed with `make test-mqtt`. The GPIO test board is built. The next session is where these two things actually meet: connect the board to the Pi, read the humidity sensor over GPIO, and push the first real reading through MQTT into InfluxDB. The Node-RED flow is already subscribed to `sensors/#`, so the plumbing is there waiting.
+MING is up and the pipeline is confirmed with `make test-mqtt`. The GPIO test board is built. The next session is where these two things actually meet: connect the board to the Pi, read the humidity sensor over GPIO, and push the first real reading through MQTT into InfluxDB. The Node-RED flow is already subscribed to `sensors/#`, so the plumbing is implemented in some way.
 
-After that, the `p4n4-hw` GPIO scripts are next in line, boot sequence indicators, service health monitoring via LED, the physical button handler. And the AI stack (`p4n4-ai`) is waiting too: Ollama, Letta, and n8n all joining the same `p4n4-net` bridge architecture.
+After that, the `p4n4-hw` GPIO scripts are next in line, boot sequence indicators, service health monitoring via LED, the physical button handler.
 
 Config written. Board built. Now to connect the two.

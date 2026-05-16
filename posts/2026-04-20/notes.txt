@@ -1,2 +1,0 @@
-- brainstorming what to solder in dev board
-- finish crafting wood base of complete dev board (hard drive, power outlet, usb hub, cameras, protoboard placeholder, gpio communication board)

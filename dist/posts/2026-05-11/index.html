@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>"pip install p4n4" — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2026-05-11</div>
+          <div class="post-eyebrow">2026-05-11</div>
+          <h1>"pip install p4n4"</h1>
+          <div class="post-date">May 11, 2026</div>
+        </header>
+        <div class="prose"><p>Hardware is stable, sensors are on their boards, and the dev board feels like a proper unit. With this post, we stepped away from all of that and focused on the CLI: getting <code>p4n4</code> onto PyPI so anyone can install it with one command.</p>
+<h2>What the CLI Does</h2>
+<p>The <code>p4n4</code> package is the entrypoint for the whole platform. It scaffolds new projects, manages stack lifecycle, and wires together the Docker Compose configuration for the IoT, GenAI, and Edge AI stacks. Built on Typer and Rich, so the interface is typed, tab-completable, and has decent output formatting out of the box.</p>
+<p>The commands registered in this release:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p4n4 init</code></td>
+<td>Scaffold a new p4n4 project</td>
+</tr>
+<tr>
+<td><code>p4n4 add</code></td>
+<td>Add a stack or component to an existing project</td>
+</tr>
+<tr>
+<td><code>p4n4 remove</code></td>
+<td>Remove a stack or component</td>
+</tr>
+<tr>
+<td><code>p4n4 up</code></td>
+<td>Bring the platform up (wraps Compose)</td>
+</tr>
+<tr>
+<td><code>p4n4 down</code></td>
+<td>Tear the platform down</td>
+</tr>
+<tr>
+<td><code>p4n4 status</code></td>
+<td>Show running service status</td>
+</tr>
+<tr>
+<td><code>p4n4 logs</code></td>
+<td>Tail service logs</td>
+</tr>
+<tr>
+<td><code>p4n4 secret</code></td>
+<td>Manage project secrets</td>
+</tr>
+<tr>
+<td><code>p4n4 validate</code></td>
+<td>Validate project configuration</td>
+</tr>
+<tr>
+<td><code>p4n4 upgrade</code></td>
+<td>Upgrade stack versions</td>
+</tr>
+<tr>
+<td><code>p4n4 ei</code></td>
+<td>Edge Impulse subcommands</td>
+</tr>
+<tr>
+<td><code>p4n4 template</code></td>
+<td>Template management subcommands</td>
+</tr>
+</tbody></table>
+<p>Version <code>0.1.0</code>. Alpha, somewhat functional, but now installable.</p>
+<h2>Tagging and the Publish Workflow</h2>
+<p>The publish pipeline is a two-job GitHub Actions workflow that fires on release publication, not on every push. The flow:</p>
+<ol>
+<li>A release is created and published on GitHub, tagged <code>v0.1.0</code></li>
+<li>The <code>build</code> job checks out the repo, installs <code>build</code>, and runs <code>python -m build</code> to produce the sdist and wheel under <code>dist/</code></li>
+<li>The artifact is uploaded between jobs</li>
+<li>The <code>publish</code> job downloads the artifact and pushes it to PyPI via <code>pypa/gh-action-pypi-publish</code></li>
+</ol>
+<p>The publish job uses OIDC trusted publishing: no PyPI API token stored anywhere as a repository secret. Instead, the job declares <code>environment: pypi</code> and requests <code>id-token: write</code> permissions. GitHub&#39;s OIDC provider mints a short-lived token at runtime that PyPI verifies directly. One fewer credential to rotate, one fewer thing that can leak ;)</p>
+<p>The build backend is <code>hatchling</code>, configured in <code>pyproject.toml</code>. Hatchling is straightforward to reason about: the wheel packages exactly the files listed in <code>[tool.hatch.build.targets.wheel]</code>, nothing implicit. The sdist excludes the test project directory and <code>.github/</code> folder via the sdist target config.</p>
+<p>CI runs separately on every push to <code>main</code> and on pull requests: <code>ruff check</code> and <code>ruff format --check</code> for linting, then <code>pytest</code> across a matrix of Python 3.11, 3.12, and 3.13. The publish workflow only runs once CI is green and a release is explicitly tagged.</p>
+<h2>Published</h2>
+<p><img src="media/00_publish-pypi.png" alt="p4n4 on PyPI">
+</p>
+<p>It took me some explorations and a few runs to publish my first python package. Eventually, the package was published on PyPI. Trusted publishing worked without any major issues. The GitHub Actions log showed both jobs green, the release page linked to the PyPI index automatically.</p>
+<p>Then the obvious test: install it from scratch in a clean environment.</p>
+<pre><code class="language-bash">pipx install p4n4
+p4n4 --help
+</code></pre>
+<p><img src="media/01_pipx-installation.png" alt="pipx install p4n4">
+</p>
+<p>That&#39;s the moment that matters. Not the workflow passing, not the PyPI page loading... the CLI running from a package that anyone else can now install the same way.</p>
+<h2>Some Observations</h2>
+<p>A few things worth noting about the publish process for next time:</p>
+<p><strong>Trusted publishing is worth setting up properly.</strong> The one-time configuration on PyPI&#39;s side (linking the GitHub repo and workflow file name) takes a few minutes, but the result is a cleaner security posture than rotating API tokens. PyPI&#39;s documentation for this has gotten a lot better.</p>
+<p><strong>Tag before releasing.</strong> The workflow triggers on release publication, but the release needs a tag to exist first. Creating the release and the tag at the same time in the GitHub UI works fine, but if the tag is missing the workflow will fail silently at checkout. Worth knowing.</p>
+<p><strong><code>python -m build</code> produces both sdist and wheel by default.</strong> Both get uploaded. For a pure-Python package like this, both are useful: the wheel for fast installs, the sdist for environments that want to build from source or inspect the code.</p>
+<p><strong>The <code>dev</code> extras keep the publish workflow clean.</strong> Test and lint dependencies are under <code>[project.optional-dependencies] dev</code>, so the published package only pulls in the five runtime dependencies. No pytest, no ruff, no coverage tooling landing in production installs.</p>
+<h2>What&#39;s Next</h2>
+<p>v0.1.0 is out. The CLI is on PyPI and installable. The next priorities are back on the hardware side: writing the GPIO read scripts for the six sensor circuits, then finally bringing up the GenAI stack for real... Ollama, Letta, and n8n have been in the architecture diagram since the beginning. I think it&#39;s time to run them.</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>

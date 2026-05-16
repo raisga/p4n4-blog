@@ -1,10 +1,10 @@
 ---
 title: "pip install p4n4"
 date: 2026-05-11
-excerpt: The CLI reaches its first public milestone. p4n4 v0.0.1 is tagged, built, and published to PyPI via GitHub Actions. Then immediately installed from the package index to make sure it actually works.
+excerpt: The CLI reaches its first public milestone. p4n4 v0.1.0 is tagged, built, and published to PyPI.
 ---
 
-Hardware is stable, sensors are on their boards, and the dev board is a proper unit. This session stepped away from all of that and focused on the CLI: getting `p4n4` onto PyPI so anyone can install it with one command.
+Hardware is stable, sensors are on their boards, and the dev board feels like a proper unit. With this post, we stepped away from all of that and focused on the CLI: getting `p4n4` onto PyPI so anyone can install it with one command.
 
 ## What the CLI Does
 
@@ -27,18 +27,18 @@ The commands registered in this release:
 | `p4n4 ei` | Edge Impulse subcommands |
 | `p4n4 template` | Template management subcommands |
 
-Version `0.0.1`. Alpha, but functional, and now installable.
+Version `0.1.0`. Alpha, somewhat functional, but now installable.
 
 ## Tagging and the Publish Workflow
 
 The publish pipeline is a two-job GitHub Actions workflow that fires on release publication, not on every push. The flow:
 
-1. A release is created and published on GitHub, tagged `v0.0.1`
+1. A release is created and published on GitHub, tagged `v0.1.0`
 2. The `build` job checks out the repo, installs `build`, and runs `python -m build` to produce the sdist and wheel under `dist/`
 3. The artifact is uploaded between jobs
 4. The `publish` job downloads the artifact and pushes it to PyPI via `pypa/gh-action-pypi-publish`
 
-The publish job uses OIDC trusted publishing: no PyPI API token stored anywhere as a repository secret. Instead, the job declares `environment: pypi` and requests `id-token: write` permissions. GitHub's OIDC provider mints a short-lived token at runtime that PyPI verifies directly. One fewer credential to rotate, one fewer thing that can leak.
+The publish job uses OIDC trusted publishing: no PyPI API token stored anywhere as a repository secret. Instead, the job declares `environment: pypi` and requests `id-token: write` permissions. GitHub's OIDC provider mints a short-lived token at runtime that PyPI verifies directly. One fewer credential to rotate, one fewer thing that can leak ;)
 
 The build backend is `hatchling`, configured in `pyproject.toml`. Hatchling is straightforward to reason about: the wheel packages exactly the files listed in `[tool.hatch.build.targets.wheel]`, nothing implicit. The sdist excludes the test project directory and `.github/` folder via the sdist target config.
 
@@ -48,18 +48,16 @@ CI runs separately on every push to `main` and on pull requests: `ruff check` an
 
 ![p4n4 on PyPI](media/00_publish-pypi.png)
 
-The package landed on PyPI cleanly on the first run. Trusted publishing worked without issues. The GitHub Actions log showed both jobs green, the release page linked to the PyPI index automatically.
+It took me some explorations and a few runs to publish my first python package. Eventually, the package was published on PyPI. Trusted publishing worked without any major issues. The GitHub Actions log showed both jobs green, the release page linked to the PyPI index automatically.
 
 Then the obvious test: install it from scratch in a clean environment.
 
 ```bash
-pip install p4n4
-p4n4 --version
+pipx install p4n4
+p4n4 --help
 ```
 
-```
-p4n4 version 0.0.1
-```
+![pipx install p4n4](media/01_pipx-installation.png)
 
 That's the moment that matters. Not the workflow passing, not the PyPI page loading... the CLI running from a package that anyone else can now install the same way.
 
@@ -77,6 +75,4 @@ A few things worth noting about the publish process for next time:
 
 ## What's Next
 
-v0.0.1 is out. The CLI is on PyPI and installable. The next priorities are back on the hardware side: writing the GPIO read scripts for the six sensor circuits, then finally bringing up the GenAI stack for real. Ollama, Letta, and n8n have been in the architecture diagram since the beginning. Time to run them.
-
-The version number starts at zero. There's a lot left to build.
+v0.1.0 is out. The CLI is on PyPI and installable. The next priorities are back on the hardware side: writing the GPIO read scripts for the six sensor circuits, then finally bringing up the GenAI stack for real... Ollama, Letta, and n8n have been in the architecture diagram since the beginning. I think it's time to run them.

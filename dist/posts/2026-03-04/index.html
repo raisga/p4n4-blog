@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wiring It All Together — p4n4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="../../index.html" class="wordmark">p4n4 :: build log</a>
+      <ul class="nav-links">
+        <li><a href="../../index.html">← index</a></li>
+        <li><a href="https://p4n4.com" target="_blank" rel="noopener">p4n4.com ↗</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <article>
+        <header class="post-header">
+          <div class="post-watermark">2026-03-04</div>
+          <div class="post-eyebrow">2026-03-04</div>
+          <h1>Wiring It All Together</h1>
+          <div class="post-date">March 4, 2026</div>
+        </header>
+        <div class="prose"><p>The previous session left the GPIO test board assembled but not connected. This one was about closing that gap: ribbon cable to the Pi, power board in, demo breadboard hooked up, and the first real sensor readings flowing through MQTT into InfluxDB.</p>
+<h2>Initial Work</h2>
+<p>Before plugging anything in, a quick look at the current state of things.</p>
+<p><img src="media/00_initial-work.jpg" alt="Initial work session">
+</p>
+<p>The board was in good shape from last time. The plan for this session was straightforward: wire the GPIO breakout, power it up through the USB board, and confirm the humidity sensor and LEDs were all reading correctly through the Pi.</p>
+<h2>Connecting the Ribbon Cable to GPIO</h2>
+<p>The Pi 5&#39;s 40-pin GPIO header is compact, so a T-type GPIO breakout board and ribbon cable were used to bring the pins out to a cleaner, label-friendly layout. The ribbon cable locks into the Pi&#39;s header on one end and the breakout board on the other.</p>
+<p><img src="media/01_gpio-diagram.jpg" alt="GPIO wiring diagram">
+</p>
+<p>Getting the orientation right on the ribbon cable is the one step that matters here. The red stripe goes to pin 1. Reversed, you get nothing at best and a damaged peripheral at worst. The breakout board labels each pin, which makes subsequent wiring a lot less error-prone than counting holes on the Pi header directly.</p>
+<p><img src="media/02_connected-gpio-view.jpg" alt="Connected GPIO view">
+</p>
+<p>Cable seated, breakout board confirmed, and evertything now accessible in a format that actually makes sense to work with.</p>
+<h2>Connecting the USB Power Board</h2>
+<p>Running the breadboard off the Pi&#39;s 3.3V and 5V GPIO pins works fine for light loads, but having a dedicated USB power board in the loop gives more headroom and keeps the Pi&#39;s own power rail clean. The board takes USB-C in and breaks out regulated 5V and 3.3V rails for the breadboard components.</p>
+<p>Straightforward connection: USB-C to the power board, power rails from the board to the breadboard&#39;s bus strips. From here the sensor and LEDs draw from those rails instead of directly from the Pi.</p>
+<h2>Connecting the Demo Breadboard</h2>
+<p>With power sorted, the demo board was connected to the breakout. This is the same board from last session: DHT11 humidity and temperature sensor, three LEDs wired to indicate readings by range.</p>
+<p><img src="media/03_putting-it-together.jpg" alt="Putting it all together">
+</p>
+<p>The DHT11 data line goes to GPIO4 with a pull-up to 3.3V. The three LEDs land on GPIO17, GPIO27, and GPIO22, each with a 330-ohm resistor. The sensor needs a 1-second delay between reads... faster polling causes it to return stale data without erroring, which is an annoying failure mode to debug the first time you encounter it.</p>
+<p><img src="media/04_breadboard-view.jpg" alt="Breadboard view">
+</p>
+<p>All connected. The breadboard is now a first-class peripheral, not a standalone prototype sitting next to the Pi.</p>
+<h2>The Full Setup</h2>
+<p>With everything wired up, a few angles of the assembled rig.</p>
+<p><img src="media/05_eagle-view.jpg" alt="Eagle view">
+</p>
+<p><img src="media/06_side-view.jpg" alt="Side view">
+</p>
+<p><img src="media/07_front-view.jpg" alt="Front view">
+</p>
+<p>The physical stack is compact: Pi 5, USB drive, GPIO breakout, power board, and breadboard, all fitting on the workbench without sprawling. Good sign for something that&#39;s meant to be a self-contained platform ;)</p>
+<h2>How It All Fits Together</h2>
+<p>With the hardware physically connected, it was a good moment to map out the full architecture on paper. Three stacks, one network, one CLI to bring it all up.</p>
+<p><img src="media/08_architecture-diagram.jpg" alt="Architecture diagram">
+</p>
+<p>The IoT stack owns <code>p4n4-net</code> and the other two stacks attach to it. The CLI scaffolds everything from a single <code>p4n4 up</code>. Sensors publish to MQTT, Node-RED routes into InfluxDB, Grafana visualizes it. On the AI side, n8n pulls from InfluxDB and feeds queries to Ollama and Letta for local inference and automation. Edge Impulse runs a separate path directly on raw sensor data.</p>
+<p>Every piece of this diagram now has something physical or running behind it... except for the GenAI and Edge AI stacks, which are next.</p>
+<h2>What&#39;s Next</h2>
+<p>The hardware layer is fully wired and the IoT pipeline is running. The next step is the <code>p4n4-hw</code> GPIO scripts: boot sequence indicators, service health monitoring via LED states, and the physical button handler that lets someone interact with the platform. After that, <code>p4n4-ai</code> comes up: Ollama, Letta, and n8n joining the same <code>p4n4-net</code> bridge and the full three-stack architecture becoming real.</p>
+<p>The diagram is no longer just a plan. Most of it is already running :D</p>
+</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="footer-logo">p4n4<span>.com</span></span>
+      <span class="footer-copy">build log</span>
+    </div>
+  </footer>
+</body>
+</html>
